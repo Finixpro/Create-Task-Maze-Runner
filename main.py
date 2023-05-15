@@ -194,9 +194,7 @@ def line_maker(start_pos, end_pos):
 
 val = line_maker(start_point, end_point)
 
-
-
-
+# this is looking verz nice
 # This is were the code gets run while playing
 game_over = False
 while not game_over:
