@@ -3,6 +3,9 @@ import random
 import math
 
 # initiates the program
+from pygame import Color
+
+
 pygame.init()
 
 dis = pygame.display.set_mode((800, 600))
@@ -15,27 +18,22 @@ dt = 0
 cardinal_directions = ["north", "east", "south", "west"]
 
 # chooses background color
-bg_color = pygame.Color(random.randrange(1, 255), random.randrange(1, 255), random.randrange(1, 255))
+bg_color: Color = pygame.Color(random.randrange(1, 255), random.randrange(1, 255), random.randrange(1, 255))
 
 # Defines the position of the player when starting the program
+player = pygame.image.load("artboard-1.png")
+player = pygame.transform.scale(player,(60, 60))
 player_pos = pygame.Vector2(dis.get_width() / 2, dis.get_height() / 2)
-player_radius = 20
+player_hitbox = pygame.Rect(player_pos.x, player_pos.y, 60, 60)
 
-
+start_point = pygame.Vector2()
+end_point = pygame.Vector2()
 # Makes the start end endpoint for the map segment
 def start_end_point():
     screen_size = pygame.Vector2(dis.get_width(), dis.get_height())
 
-    start_point = pygame.Vector2()
-    end_point = pygame.Vector2()
 
     x = random.choice([1, 2])
-    print(x)
-
-    color_start = "blue"
-    color_end = "red"
-
-    size_circle = 20
 
     if x == 1:
         start_point.x = random.choice([0, screen_size.x])
@@ -103,16 +101,13 @@ def start_end_point():
                 end_point.y = random.randrange(int(screen_size.y))
     print(start_point)
     print(end_point)
-    return start_point, end_point
+start_end_point()
 
-# This is where the command is called for making of the map
-val = start_end_point()
-
-start_point = val[0]
-end_point = val[1]
+# configures where the end object collision detector should be
+end_rect = pygame.Rect(end_point.x , end_point.y , 40, 40)
 
 
-def middle_point(start_pos, end_pos):
+def line_connecter(start_pos, end_pos):
     distance = math.dist(start_pos, end_pos)
     print(distance)
     direction_start = ""
@@ -140,64 +135,68 @@ def middle_point(start_pos, end_pos):
     if direction_start == "north":
 
         if direction_end == "east":
-            pos.x = start_pos[0]
-            pos.y = end_pos[1]
+            pos.x = start_pos[0] - end_pos[0]
+            pos.y = start_pos[1] - end_pos[1]
         elif direction_end == "south":
-            pos.x = start_pos[0]
+            pos.x = start_pos[0] - end_pos[0]
             pos.y = 600
         elif direction_end == "west":
-            pos.x = start_pos[0]
-            pos.y = end_pos[1]
+            pos.x = end_pos[0] - start_pos[0]
+            pos.y = start_pos[1] - end_pos[1]
 
     elif direction_start == "east":
 
         if direction_end == "south":
-            pos.x = end_pos[0]
-            pos.y = start_pos[1]
+            pos.x = start_pos[0] - end_pos[0]
+            pos.y = start_pos[1] - end_pos[1]
         elif direction_end == "west":
             pos.x = 800
-            pos.y = end_pos[1]
+            pos.y = start_pos[1] - end_pos[1]
         elif direction_end == "north":
-            pos.x = end_pos[0]
-            pos.y = start_pos[1]
+            pos.x = end_pos[0] - start_pos[0]
+            pos.y = start_pos[1] - end_pos[1]
 
     elif direction_start == "south":
 
         if direction_end == "west":
-            pos.x = start_pos[0]
-            pos.y = end_pos[1]
+            pos.x = end_pos[0] - start_pos[0]
+            pos.y = start_pos[1] - end_pos[1]
         elif direction_end == "north":
-            pos.x = start_pos[0]
-            pos.y = 600
+            pos.x = end_pos[0] - start_pos[0]
+            pos.y = 0
         elif direction_end == "east":
-            pos.x = start_pos[0]
-            pos.y = end_pos[1]
+            pos.x = end_pos[0] - start_pos[0]
+            pos.y = end_pos[1] - start_pos[1]
 
     elif direction_start == "west":
 
         if direction_end == "north":
-            pos.x = end_pos[0]
-            pos.y = start_pos[1]
+            pos.x = end_pos[0] - start_pos[0]
+            pos.y = end_pos[1] - start_pos[1]
         elif direction_end == "east":
             pos.x = 0
-            pos.y = end_pos[1]
+            pos.y = end_pos[1] - start_pos[1]
         elif direction_end == "south":
-            pos.x = end_pos[0]
-            pos.y = start_pos[1]
+            pos.x = start_pos[0] - end_pos[0]
+            pos.y = end_pos[1] - start_pos[1]
 
     print(direction_start)
     print(direction_end)
     print("here is middle point")
     print(pos)
-
     return(pos)
+val = line_connecter(start_point, end_point)
 
 
-val_1 = middle_point(start_point, end_point)
+def reached_end(end_pos):
+    finish_area = pygame.rect.RectType
+
+    if end_pos == 0:
+        print("")
 
 
-# this is looking very nice
-# This is where the code gets run while playing
+
+# This is were the code gets run while playing
 game_over = False
 while not game_over:
     # option to quit the game at anytime
@@ -206,18 +205,11 @@ while not game_over:
             game_over = True
 
     # fills in background
-    dis.fill(bg_color)
+    dis.fill((255,255,255))
 
-    # draws start and end point
-    pygame.draw.circle(dis, "red", start_point, 20)
-    pygame.draw.circle(dis, "blue", end_point, 20)
+    # The figure of the character
+    dis.blit(player, player_pos)
 
-    # draws line connecting start to end
-    pygame.draw.line(dis, "white", start_point, end_point)
-
-    pygame.draw.circle(dis, "pink", val_1, 20)
-    pygame.draw.line(dis, 'white', start_point, val_1)
-    pygame.draw.line(dis, 'white', val_1, end_point)
     # Adds the Cardinal directions to the game
     if True:
         # North
@@ -241,8 +233,15 @@ while not game_over:
         text_pos = text.get_rect(x=10, centery=dis.get_height() / 2)
         dis.blit(text, text_pos)
 
-    # The figure of the character
-    pygame.draw.circle(dis, "green", player_pos, player_radius)
+    # draws start and end point
+    pygame.draw.circle(dis, "red", start_point, 20)
+    pygame.draw.circle(dis, "blue", end_point, 20)
+    pygame.draw.rect(dis, "green", end_rect, 8)
+
+    # draws line connecting start to end
+    pygame.draw.line(dis,"white",start_point, end_point)
+
+    pygame.draw.circle(dis,"pink", val, 20)
 
     # Makes the character move
     keys = pygame.key.get_pressed()
@@ -255,8 +254,10 @@ while not game_over:
     if keys[pygame.K_d]:
         player_pos.x += 300 * dt
 
+    # function for if the player touches the wall
     # check if the game object has gone off the screen
-    if player_pos[0] - player_radius < 0:
+    """
+    if player_pos[0] - player.get_width < 0:
         player_pos[0] = player_radius
     if player_pos[0] + player_radius > dis.get_width():
         player_pos[0] = dis.get_width() - player_radius
@@ -264,9 +265,7 @@ while not game_over:
         player_pos[1] = player_radius
     if player_pos[1] + player_radius > dis.get_height():
         player_pos[1] = dis.get_height() - player_radius
-
-    # function for if the player touches the wall
-
+    """
     pygame.display.flip()
 
     # limits FPS to 60
