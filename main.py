@@ -13,7 +13,7 @@ pygame.display.update()
 pygame.display.set_caption('Maze Runner')
 clock = pygame.time.Clock()
 dt = 0
-
+time = 0
 # Cardinal directions
 cardinal_directions = ["north", "east", "south", "west"]
 
@@ -24,7 +24,7 @@ bg_color: Color = pygame.Color(random.randrange(1, 255), random.randrange(1, 255
 player = pygame.image.load("artboard-1.png")
 player = pygame.transform.scale(player,(60, 60))
 player_pos = pygame.Vector2(dis.get_width() / 2, dis.get_height() / 2)
-player_hitbox = pygame.Rect(player_pos.x, player_pos.y, 60, 60)
+player_hitbox = pygame.Rect(player_pos.x - 30, player_pos.y - 30, 60, 60)
 
 start_point = pygame.Vector2()
 end_point = pygame.Vector2()
@@ -104,10 +104,11 @@ def start_end_point():
 start_end_point()
 
 # configures where the end object collision detector should be
-end_rect = pygame.Rect(end_point.x , end_point.y , 40, 40)
+end_rect = pygame.Rect(end_point.x - 20, end_point.y - 20, 40, 40)
+color_end_box = "green"
 
 
-def line_connecter(start_pos, end_pos):
+def line_connector(start_pos, end_pos):
     distance = math.dist(start_pos, end_pos)
     print(distance)
     direction_start = ""
@@ -185,16 +186,18 @@ def line_connecter(start_pos, end_pos):
     print("here is middle point")
     print(pos)
     return(pos)
-val = line_connecter(start_point, end_point)
+val = line_connector(start_point, end_point)
 
 
-def reached_end(end_pos):
-    finish_area = pygame.rect.RectType
-
-    if end_pos == 0:
-        print("")
-
-
+def game_Finished():
+    dis.fill((0, 0, 0))
+    Font = pygame.font.Font(None, 30)
+    game_over_text = font.render("GAME FINISHED", True, (200, 200, 200))
+    game_time_text = font.render(f"Time taken to finished Maze Runner {int(time/60)} Seconds ", True, (200, 200, 200))
+    game_rerun_text = font.render("press SPACE to try again", True, (200, 200, 200))
+    dis.blit(game_over_text, (dis.get_width() / 2 - (game_over_text.get_width()/2), dis.get_height() / 2 - 40))
+    dis.blit(game_time_text, (dis.get_width() / 2 - (game_time_text.get_width()/2), dis.get_height() / 2))
+    dis.blit(game_rerun_text, (dis.get_width() / 2 - (game_rerun_text.get_width()/2), dis.get_height() / 2 + 60))
 
 # This is were the code gets run while playing
 game_over = False
@@ -209,6 +212,8 @@ while not game_over:
 
     # The figure of the character
     dis.blit(player, player_pos)
+    player_hitbox = pygame.Rect(player_pos.x, player_pos.y, 60, 60)
+    pygame.draw.rect(dis, "red", player_hitbox, 4)
 
     # Adds the Cardinal directions to the game
     if True:
@@ -236,12 +241,21 @@ while not game_over:
     # draws start and end point
     pygame.draw.circle(dis, "red", start_point, 20)
     pygame.draw.circle(dis, "blue", end_point, 20)
-    pygame.draw.rect(dis, "green", end_rect, 8)
 
     # draws line connecting start to end
-    pygame.draw.line(dis,"white",start_point, end_point)
+    pygame.draw.line(dis, "white", start_point, end_point)
 
-    pygame.draw.circle(dis,"pink", val, 20)
+    # Checks if you have reached the finish line
+    pygame.draw.rect(dis, color_end_box, end_rect, 4)
+    if player_hitbox.colliderect(end_rect):
+        game_Finished()
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:
+            print("pressed")
+            continue
+    else:
+        # adds time counter to the game
+        time += 1
 
     # Makes the character move
     keys = pygame.key.get_pressed()
@@ -255,7 +269,7 @@ while not game_over:
         player_pos.x += 300 * dt
 
     # function for if the player touches the wall
-    # check if the game object has gone off the screen
+    # check if the Player has gone off the screen
     """
     if player_pos[0] - player.get_width < 0:
         player_pos[0] = player_radius
@@ -266,6 +280,7 @@ while not game_over:
     if player_pos[1] + player_radius > dis.get_height():
         player_pos[1] = dis.get_height() - player_radius
     """
+
     pygame.display.flip()
 
     # limits FPS to 60
